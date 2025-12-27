@@ -1,33 +1,35 @@
 package btw.community.betterend.item;
 
 import btw.community.betterend.BetterEndAddon;
+import btw.community.betterend.client.TotemCravenSprite;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
-
 import java.util.Iterator;
 
 public class ItemTotemOfTheCraven extends Item {
-
     public ItemTotemOfTheCraven(int id) {
         super(id);
         this.setUnlocalizedName("betterend.totem_craven");
         this.setCreativeTab(CreativeTabs.tabTransport);
-        this.setTextureName("betterend:totem_craven");
         this.setMaxStackSize(1);
+    }
+
+    @Override
+    public void registerIcons(IconRegister register) {
+        TextureAtlasSprite customSprite = new TotemCravenSprite("betterend:totem_craven", "btw:corpse_eye");
+        this.itemIcon = register.registerIcon("betterend:totem_craven", customSprite);
     }
 
     @Override
     public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
         if (!world.isRemote && player instanceof EntityPlayerMP) {
             EntityPlayerMP playerMP = (EntityPlayerMP) player;
-
             long currentTime = world.getTotalWorldTime();
             long cooldownTicks = BetterEndAddon.totemCooldownSeconds * 20L;
 
             if (stack.hasTagCompound() && stack.getTagCompound().hasKey("lastUsed")) {
                 long lastUsed = stack.getTagCompound().getLong("lastUsed");
                 long timeDiff = currentTime - lastUsed;
-
                 if (timeDiff < cooldownTicks) {
                     long secondsLeft = (cooldownTicks - timeDiff) / 20L;
                     player.addChatMessage("Totem needs to recharge... (" + secondsLeft + "s)");
@@ -36,7 +38,6 @@ public class ItemTotemOfTheCraven extends Item {
             }
 
             System.out.println("BetterEnd: Totem used by " + player.username);
-
             performTeleport(playerMP);
 
             if (!stack.hasTagCompound()) {
@@ -48,7 +49,6 @@ public class ItemTotemOfTheCraven extends Item {
                 stack.stackSize--;
             }
         }
-
         return stack;
     }
 
@@ -58,7 +58,6 @@ public class ItemTotemOfTheCraven extends Item {
         int newDim = 0;
 
         System.out.println("BetterEnd: Initiating teleport from Dim " + oldDim + " to " + newDim);
-
         player.worldObj.playSoundAtEntity(player, "mob.endermen.portal", 1.0F, 1.0F);
 
         WorldServer newWorld = server.worldServerForDimension(newDim);
@@ -69,7 +68,6 @@ public class ItemTotemOfTheCraven extends Item {
             WorldServer oldWorld = server.worldServerForDimension(oldDim);
 
             player.dimension = newDim;
-
             player.playerNetServerHandler.sendPacketToPlayer(new Packet9Respawn(
                     player.dimension,
                     (byte)newWorld.difficultySetting,
@@ -85,9 +83,9 @@ public class ItemTotemOfTheCraven extends Item {
             player.setWorld(newWorld);
 
             configManager.func_72375_a(player, oldWorld);
+
             newWorld.spawnEntityInWorld(player);
             newWorld.updateEntityWithOptionalForce(player, false);
-
             player.theItemInWorldManager.setWorld(newWorld);
 
             player.playerNetServerHandler.setPlayerLocation(
@@ -105,9 +103,7 @@ public class ItemTotemOfTheCraven extends Item {
                 PotionEffect effect = (PotionEffect) obj;
                 player.playerNetServerHandler.sendPacketToPlayer(new Packet41EntityEffect(player.entityId, effect));
             }
-
             player.timeOfLastDimensionSwitch = newWorld.getWorldTime();
-
         } else {
             player.playerNetServerHandler.setPlayerLocation(
                     spawn.posX + 0.5,
@@ -121,7 +117,6 @@ public class ItemTotemOfTheCraven extends Item {
         player.fallDistance = 0.0F;
         player.worldObj.playSoundAtEntity(player, "mob.endermen.portal", 1.0F, 1.0F);
         player.addChatMessage("You ran away like a coward!");
-
         System.out.println("BetterEnd: Teleport sequence finished successfully.");
     }
 
@@ -131,7 +126,6 @@ public class ItemTotemOfTheCraven extends Item {
             long lastUsed = stack.getTagCompound().getLong("lastUsed");
             long timeDiff = player.worldObj.getTotalWorldTime() - lastUsed;
             long cooldownTicks = BetterEndAddon.totemCooldownSeconds * 20L;
-
             if (timeDiff < cooldownTicks) {
                 long secondsLeft = (cooldownTicks - timeDiff) / 20L;
                 list.add("Cooldown: " + secondsLeft + "s");
