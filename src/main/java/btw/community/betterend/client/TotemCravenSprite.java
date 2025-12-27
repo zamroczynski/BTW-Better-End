@@ -33,6 +33,7 @@ public class TotemCravenSprite extends TextureAtlasSprite {
         try {
             baseResource = resourceManager.getResource(baseLocation);
         } catch (Exception e) {
+            // Fallback
         }
 
         if (baseResource == null) {
@@ -43,6 +44,14 @@ public class TotemCravenSprite extends TextureAtlasSprite {
         this.clearFramesTextureData();
 
         BufferedImage originalImage = ImageIO.read(baseResource.getInputStream());
+
+        // POPRAWKA: Obsługa animowanych tekstur (pasków).
+        // Jeśli obraz jest wyższy niż szerszy (np. 32x96), bierzemy tylko górny kwadrat (32x32).
+        if (originalImage.getHeight() > originalImage.getWidth()) {
+            int size = originalImage.getWidth();
+            // Pobieramy tylko pierwszą klatkę (subimage: x, y, w, h)
+            originalImage = originalImage.getSubimage(0, 0, size, size);
+        }
 
         BufferedImage processedImage = applyPurpleBackground(originalImage);
 
@@ -64,6 +73,7 @@ public class TotemCravenSprite extends TextureAtlasSprite {
         original.getRGB(0, 0, w, h, srcPixels, 0, w);
 
         int[] dstPixels = new int[w * h];
+        // Kolor: Ciemny Fiolet (ARGB)
         int purpleColor = 0xFF4B0082;
 
         for (int y = 0; y < h; y++) {
