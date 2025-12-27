@@ -2,11 +2,15 @@ package btw.community.betterend;
 
 import api.BTWAddon;
 import api.config.AddonConfig;
+import btw.item.BTWItems;
+import net.minecraft.src.Block;
+import net.minecraft.src.CraftingManager;
+import net.minecraft.src.Item;
+import net.minecraft.src.ItemStack;
 
 public class BetterEndAddon extends BTWAddon {
     private static BetterEndAddon instance;
 
-    // Config variables
     public static int totemCooldownSeconds;
     public static boolean isTotemSingleUse;
 
@@ -21,15 +25,13 @@ public class BetterEndAddon extends BTWAddon {
 
     @Override
     public void initialize() {
-        this.addonConfig = new AddonConfig(this.modID);
-        this.registerConfigProperties(this.addonConfig);
-        this.addonConfig.readAndWriteConfig();
-
-        BetterEndItems.totemOfTheCravenID = this.addonConfig.getInt("IDs.TotemOfTheCraven");
-        totemCooldownSeconds = this.addonConfig.getInt("General.TotemCooldownSeconds");
-        isTotemSingleUse = this.addonConfig.getBoolean("General.IsTotemSingleUse");
+        AddonConfig config = this.addonConfig;
 
         System.out.println(this.getName() + " Config Loaded: Cooldown=" + totemCooldownSeconds + "s, SingleUse=" + isTotemSingleUse);
+
+        BetterEndItems.createItems();
+
+        createRecipes();
     }
 
     @Override
@@ -41,5 +43,28 @@ public class BetterEndAddon extends BTWAddon {
 
         config.registerBoolean("General.IsTotemSingleUse", false,
                 "If true, Totem of the Craven is consumed upon use. Default: false.");
+    }
+
+    @Override
+    public void handleConfigProperties(AddonConfig config) {
+        BetterEndItems.totemOfTheCravenID = config.getInt("IDs.TotemOfTheCraven");
+        totemCooldownSeconds = config.getInt("General.TotemCooldownSeconds");
+        isTotemSingleUse = config.getBoolean("General.IsTotemSingleUse");
+    }
+
+    private void createRecipes() {
+        // Glass Pane | Redstone Eye | Glass Pane
+        // Corpse Eye | Nether Star  | Corpse Eye
+        // Glass Pane | Redstone Eye | Glass Pane
+
+        CraftingManager.getInstance().addRecipe(new ItemStack(BetterEndItems.totemOfTheCraven), new Object[] {
+                "GRG",
+                "CNC",
+                "GRG",
+                'G', Block.thinGlass,          // Glass Pane
+                'R', BTWItems.redstoneEye,     // Redstone Eye (z BTW)
+                'C', BTWItems.corpseEye,       // Corpse Eye (z BTW)
+                'N', Item.netherStar           // Nether Star
+        });
     }
 }

@@ -4,6 +4,8 @@ import btw.community.betterend.BetterEndAddon;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
 
+import java.util.Iterator;
+
 public class ItemTotemOfTheCraven extends Item {
 
     public ItemTotemOfTheCraven(int id) {
@@ -33,12 +35,14 @@ public class ItemTotemOfTheCraven extends Item {
                 }
             }
 
+            System.out.println("BetterEnd: Totem used by " + player.username);
+
             performTeleport(playerMP);
 
             if (!stack.hasTagCompound()) {
                 stack.setTagCompound(new NBTTagCompound());
             }
-            stack.getTagCompound().setLong("lastUsed", currentTime);
+            stack.getTagCompound().setLong("lastUsed", playerMP.worldObj.getTotalWorldTime());
 
             if (BetterEndAddon.isTotemSingleUse && !player.capabilities.isCreativeMode) {
                 stack.stackSize--;
@@ -50,29 +54,75 @@ public class ItemTotemOfTheCraven extends Item {
 
     private void performTeleport(EntityPlayerMP player) {
         MinecraftServer server = MinecraftServer.getServer();
+        int oldDim = player.dimension;
+        int newDim = 0;
+
+        System.out.println("BetterEnd: Initiating teleport from Dim " + oldDim + " to " + newDim);
 
         player.worldObj.playSoundAtEntity(player, "mob.endermen.portal", 1.0F, 1.0F);
 
-        if (player.dimension != 0) {
-            server.getConfigurationManager().transferPlayerToDimension(player, 0);
+        WorldServer newWorld = server.worldServerForDimension(newDim);
+        ChunkCoordinates spawn = newWorld.getSpawnPoint();
+
+        if (oldDim != newDim) {
+            ServerConfigurationManager configManager = server.getConfigurationManager();
+            WorldServer oldWorld = server.worldServerForDimension(oldDim);
+
+            player.dimension = newDim;
+
+            player.playerNetServerHandler.sendPacketToPlayer(new Packet9Respawn(
+                    player.dimension,
+                    (byte)newWorld.difficultySetting,
+                    newWorld.getWorldInfo().getTerrainType(),
+                    newWorld.getHeight(),
+                    player.theItemInWorldManager.getGameType()
+            ));
+
+            oldWorld.removePlayerEntityDangerously(player);
+            player.isDead = false;
+
+            player.setLocationAndAngles(spawn.posX + 0.5, spawn.posY, spawn.posZ + 0.5, player.rotationYaw, player.rotationPitch);
+            player.setWorld(newWorld);
+
+            configManager.func_72375_a(player, oldWorld);
+            newWorld.spawnEntityInWorld(player);
+            newWorld.updateEntityWithOptionalForce(player, false);
+
+            player.theItemInWorldManager.setWorld(newWorld);
+
+            player.playerNetServerHandler.setPlayerLocation(
+                    spawn.posX + 0.5,
+                    spawn.posY,
+                    spawn.posZ + 0.5,
+                    player.rotationYaw,
+                    player.rotationPitch
+            );
+
+            configManager.updateTimeAndWeatherForPlayer(player, newWorld);
+            configManager.syncPlayerInventory(player);
+
+            for (Object obj : player.getActivePotionEffects()) {
+                PotionEffect effect = (PotionEffect) obj;
+                player.playerNetServerHandler.sendPacketToPlayer(new Packet41EntityEffect(player.entityId, effect));
+            }
+
+            player.timeOfLastDimensionSwitch = newWorld.getWorldTime();
+
+        } else {
+            player.playerNetServerHandler.setPlayerLocation(
+                    spawn.posX + 0.5,
+                    spawn.posY,
+                    spawn.posZ + 0.5,
+                    player.rotationYaw,
+                    player.rotationPitch
+            );
         }
 
-        WorldServer overworld = server.worldServerForDimension(0);
-        ChunkCoordinates spawn = overworld.getSpawnPoint();
-
-        player.playerNetServerHandler.setPlayerLocation(
-                spawn.posX + 0.5,
-                spawn.posY,
-                spawn.posZ + 0.5,
-                player.rotationYaw,
-                player.rotationPitch
-        );
-
         player.fallDistance = 0.0F;
-
         player.worldObj.playSoundAtEntity(player, "mob.endermen.portal", 1.0F, 1.0F);
+        player.addChatMessage("You ran away like a coward!");
 
-        player.addChatMessage("You have fled to safety!");
+        System.out.println("BetterEnd: Teleport sequence finished successfully.");
     }
 
     @Override
