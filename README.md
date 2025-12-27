@@ -7,7 +7,7 @@
 
 ### Features & Roadmap
 - [x] **Totem of the Craven:** An item that allows teleportation out of the End (and back to world spawn) without killing the Dragon.
-- [ ] **Ender Crystal Overhaul:** Destroying crystals inflicts negative status effects (Nausea or Blindness).
+- [x] **Ender Crystal Overhaul:** Destroying crystals inflicts negative status effects (Nausea or Blindness).
 - [ ] **New Mob: Ender Mite:** A silverfish-like mob that eats player hunger and armor durability. Drops "Mite Gland".
 - [ ] **Harder Ender Dragon:** Significantly buffed physical damage stats.
 - [ ] **New Dragon Attacks:**
@@ -28,7 +28,7 @@
 
 ### Lista Funkcjonalności (Plan działania)
 - [x] **Totem Tchórza (Totem of the Craven):** Przedmiot umożliwiający ucieczkę z Endu (powrót na oryginalny spawn) bez zabijania Smoka.
-- [ ] **Zmiany w Kryształach Kresu:** Zniszczenie kryształu nakłada na gracza efekty Nudności lub Oślepienia.
+- [x] **Zmiany w Kryształach Kresu:** Zniszczenie kryształu nakłada na gracza efekty Nudności lub Oślepienia.
 - [ ] **Nowy Mob: Ender Mite:** Mob przypominający rybika, niszczący głód i zbroję gracza. Źródło składnika "Mite Gland".
 - [ ] **Silniejszy Smok Kresu:** Zwiększone obrażenia fizyczne (gracz bez specjalnej zbroi ginie niemal natychmiast).
 - [ ] **Nowe ataki Smoka:**
