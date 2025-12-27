@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "betterend",
+  "version": "${version}",
+  "name": "Better End Addon",
+  "description": "Addon for BTW improving End content.",
+  "authors": [
+    "Bard Radogost"
+  ],
+  "contact": {
+    "homepage": "https://legacyfabric.net/",
+    "sources": "https://github.com/Legacy-Fabric/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/modid/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "btw:addon": [
+      "btw.community.betterend.BetterEndAddon"
+    ]
+  },
+  "custom": {
+    "btw:addon_prefix": "BE"
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": "1.6.4"
+  }
+}
