@@ -4,7 +4,8 @@
   "package": "btw.community.betterend.mixins",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MixinEntityEnderCrystal"
+    "MixinEntityEnderCrystal",
+    "MixinItemInWorldManager"
   ],
   "client": [
   ],
