@@ -40,6 +40,7 @@ public class BetterEndAddon extends BTWAddon {
     public static int dragonEndlessFireDurationMax;
     public static int dragonEndlessBreathRadius;
     public static int dragonEndlessBreathWitherStrength;
+    public static int dragonAttackCooldown;
 
     public BetterEndAddon() {
         super();
@@ -89,12 +90,13 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("Dragon.XPPeriodic", 1000, "Amount of XP dropped periodically during Dragon death animation. Vanilla: 1000");
         config.registerInt("Dragon.XPFinal", 2000, "Amount of XP dropped at the end of Dragon death animation. Vanilla: 2000");
         config.registerInt("IDs.EndlessFire", 3000, "ID for the Endless Fire block");
-        config.registerInt("Dragon.EndlessBreath.Cooldown", 1200, "Cooldown for Endless Breath attack in ticks (1200 = 60s).");
+        config.registerInt("Dragon.EndlessBreath.Cooldown", 100, "Internal cooldown for breath attack (not used in State Machine mode).");
         config.registerInt("Dragon.EndlessBreath.Duration", 60, "Duration of the Dragon's roar/hover during attack in ticks (60 = 3s).");
         config.registerInt("Dragon.EndlessBreath.FireDurationMin", 30, "Minimum duration of Endless Fire on ground in seconds.");
         config.registerInt("Dragon.EndlessBreath.FireDurationMax", 60, "Maximum duration of Endless Fire on ground in seconds.");
         config.registerInt("Dragon.EndlessBreath.Radius", 10, "Radius around player to spawn Endless Fire.");
         config.registerInt("Dragon.EndlessBreath.WitherStrength", 1, "Strength of Wither effect (0 = I, 1 = II, etc).");
+        config.registerInt("Dragon.General.AttackCooldown", 15, "Time in seconds between Dragon attacks (Peace phase).");
     }
 
     @Override
@@ -126,6 +128,7 @@ public class BetterEndAddon extends BTWAddon {
         dragonEndlessFireDurationMax = config.getInt("Dragon.EndlessBreath.FireDurationMax");
         dragonEndlessBreathRadius = config.getInt("Dragon.EndlessBreath.Radius");
         dragonEndlessBreathWitherStrength = config.getInt("Dragon.EndlessBreath.WitherStrength");
+        dragonAttackCooldown = config.getInt("Dragon.General.AttackCooldown");
     }
 
     private void registerEntity() {
