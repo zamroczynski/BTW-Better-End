@@ -24,6 +24,12 @@ public class BetterEndAddon extends BTWAddon {
     public static int miteHungerDamage;
     public static int miteArmorDamage;
     public static int dragonAttackDamage;
+    public static int dragonMaxHealth;
+    public static int dragonKnockback;
+    public static int dragonCrystalRegenAmount;
+    public static int dragonCrystalExplosionDamage;
+    public static int dragonXPPeriodic;
+    public static int dragonXPFinal;
     public BetterEndAddon() {
         super();
         instance = this;
@@ -58,6 +64,12 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("EnderMite.HungerDamage", 1, "Amount of hunger removed per attack (1 = half shank). Default: 1");
         config.registerInt("EnderMite.ArmorDamage", 1, "Amount of durability lost on armor per attack. Default: 1");
         config.registerInt("Dragon.AttackDamage", 30, "Damage dealt by Ender Dragon's head collision (in half-hearts). Vanilla: 10, Default: 30");
+        config.registerInt("Dragon.MaxHealth", 200, "Max health of Ender Dragon (200 = 100 hearts). Vanilla: 200");
+        config.registerInt("Dragon.KnockbackStrength", 4, "Knockback strength when hit by Dragon body/wings. Vanilla: 4");
+        config.registerInt("Dragon.CrystalRegenAmount", 1, "Health restored by Ender Crystal per tick cycle. Vanilla: 1");
+        config.registerInt("Dragon.CrystalExplosionDamage", 10, "Damage taken by Dragon when a linked crystal is destroyed. Vanilla: 10");
+        config.registerInt("Dragon.XPPeriodic", 1000, "Amount of XP dropped periodically during Dragon death animation. Vanilla: 1000");
+        config.registerInt("Dragon.XPFinal", 2000, "Amount of XP dropped at the end of Dragon death animation. Vanilla: 2000");
     }
     @Override
     public void handleConfigProperties(AddonConfig config) {
@@ -75,6 +87,12 @@ public class BetterEndAddon extends BTWAddon {
         miteHungerDamage = config.getInt("EnderMite.HungerDamage");
         miteArmorDamage = config.getInt("EnderMite.ArmorDamage");
         dragonAttackDamage = config.getInt("Dragon.AttackDamage");
+        dragonMaxHealth = config.getInt("Dragon.MaxHealth");
+        dragonKnockback = config.getInt("Dragon.KnockbackStrength");
+        dragonCrystalRegenAmount = config.getInt("Dragon.CrystalRegenAmount");
+        dragonCrystalExplosionDamage = config.getInt("Dragon.CrystalExplosionDamage");
+        dragonXPPeriodic = config.getInt("Dragon.XPPeriodic");
+        dragonXPFinal = config.getInt("Dragon.XPFinal");
     }
     private void registerEntity() {
         EntityList.addMapping(EntityEnderMite.class, "EnderMite", entityEnderMiteID, 0x152156, 0x69178d);
