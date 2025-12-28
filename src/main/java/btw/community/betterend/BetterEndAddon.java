@@ -60,11 +60,11 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("IDs.MiteGland", 31001, "ID for the Mite Gland item");
         config.registerInt("IDs.EntityEnderMite", 201, "Global Entity ID for Ender Mite");
 
-        config.registerInt("EnderMite.SpawnChanceEndBlocks", 40, "Chance (%) for Ender Mite to spawn when breaking End blocks (e.g. Whitestone). Default: 40%");
+        config.registerInt("EnderMite.SpawnChanceEndBlocks", 10, "Chance (%) for Ender Mite to spawn when breaking End blocks (e.g. Whitestone). Default: 10%");
         config.registerInt("EnderMite.SpawnChanceOtherBlocks", 5, "Chance (%) for Ender Mite to spawn when breaking non-End blocks in The End. Default: 5%");
         config.registerInt("EnderMite.AttackDamage", 0, "Damage dealt by Ender Mite (in half-hearts). Default: 0");
-        config.registerBoolean("EnderMite.KnockbackEnabled", false, "Does Ender Mite attack cause knockback? Default: false");
-        config.registerInt("EnderMite.DropChance", 20, "Chance (%) to drop Mite Gland. Default: 20%");
+        config.registerBoolean("EnderMite.KnockbackEnabled", false, "Does Ender Mite attack cause knockback? The AttackDamage value must be greater than 0 for Knockback to work. Default: false");
+        config.registerInt("EnderMite.DropChance", 50, "Chance (%) to drop Mite Gland. Default: 50%");
     }
 
     @Override
