@@ -41,6 +41,7 @@ public class BetterEndAddon extends BTWAddon {
     public static int dragonEndlessBreathRadius;
     public static int dragonEndlessBreathWitherStrength;
     public static int dragonAttackCooldown;
+    public static int dragonEndlessBreathWitherDuration;
 
     public BetterEndAddon() {
         super();
@@ -97,6 +98,7 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("Dragon.EndlessBreath.Radius", 10, "Radius around player to spawn Endless Fire.");
         config.registerInt("Dragon.EndlessBreath.WitherStrength", 1, "Strength of Wither effect (0 = I, 1 = II, etc).");
         config.registerInt("Dragon.General.AttackCooldown", 15, "Time in seconds between Dragon attacks (Peace phase).");
+        config.registerInt("Dragon.EndlessBreath.WitherDuration", 100, "Duration of Wither effect from Endless Fire in ticks (100 = 5s).");
     }
 
     @Override
@@ -129,6 +131,7 @@ public class BetterEndAddon extends BTWAddon {
         dragonEndlessBreathRadius = config.getInt("Dragon.EndlessBreath.Radius");
         dragonEndlessBreathWitherStrength = config.getInt("Dragon.EndlessBreath.WitherStrength");
         dragonAttackCooldown = config.getInt("Dragon.General.AttackCooldown");
+        dragonEndlessBreathWitherDuration = config.getInt("Dragon.EndlessBreath.WitherDuration");
     }
 
     private void registerEntity() {
