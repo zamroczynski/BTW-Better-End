@@ -63,6 +63,12 @@ public class ItemTotemOfTheCraven extends Item {
         WorldServer newWorld = server.worldServerForDimension(newDim);
         ChunkCoordinates spawn = newWorld.getSpawnPoint();
 
+        int safeY = newWorld.getTopSolidOrLiquidBlock(spawn.posX, spawn.posZ);
+
+        if (safeY < 0) {
+            safeY = spawn.posY;
+        }
+
         if (oldDim != newDim) {
             ServerConfigurationManager configManager = server.getConfigurationManager();
             WorldServer oldWorld = server.worldServerForDimension(oldDim);
@@ -79,18 +85,17 @@ public class ItemTotemOfTheCraven extends Item {
             oldWorld.removePlayerEntityDangerously(player);
             player.isDead = false;
 
-            player.setLocationAndAngles(spawn.posX + 0.5, spawn.posY, spawn.posZ + 0.5, player.rotationYaw, player.rotationPitch);
+            player.setLocationAndAngles(spawn.posX + 0.5, safeY, spawn.posZ + 0.5, player.rotationYaw, player.rotationPitch);
+
             player.setWorld(newWorld);
-
             configManager.func_72375_a(player, oldWorld);
-
             newWorld.spawnEntityInWorld(player);
             newWorld.updateEntityWithOptionalForce(player, false);
             player.theItemInWorldManager.setWorld(newWorld);
 
             player.playerNetServerHandler.setPlayerLocation(
                     spawn.posX + 0.5,
-                    spawn.posY,
+                    safeY,
                     spawn.posZ + 0.5,
                     player.rotationYaw,
                     player.rotationPitch
@@ -107,7 +112,7 @@ public class ItemTotemOfTheCraven extends Item {
         } else {
             player.playerNetServerHandler.setPlayerLocation(
                     spawn.posX + 0.5,
-                    spawn.posY,
+                    safeY,
                     spawn.posZ + 0.5,
                     player.rotationYaw,
                     player.rotationPitch
