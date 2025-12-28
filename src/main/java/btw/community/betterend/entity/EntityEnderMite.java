@@ -48,11 +48,13 @@ public class EntityEnderMite extends EntityMob {
         if (target instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) target;
 
-            if (player.getFoodStats().getFoodLevel() > 0) {
-                player.getFoodStats().addStats(-1, 0.0F);
+            if (BetterEndAddon.miteHungerDamage > 0 && player.getFoodStats().getFoodLevel() > 0) {
+                player.getFoodStats().addStats(-BetterEndAddon.miteHungerDamage, 0.0F);
             }
 
-            destroyArmor(player);
+            if (BetterEndAddon.miteArmorDamage > 0) {
+                destroyArmor(player);
+            }
 
             if (!attackSuccess && damage == 0) {
                 attackSuccess = true;
@@ -67,7 +69,7 @@ public class EntityEnderMite extends EntityMob {
         for (int i = 0; i < armor.length; i++) {
             ItemStack stack = armor[i];
             if (stack != null) {
-                stack.damageItem(1, player);
+                stack.damageItem(BetterEndAddon.miteArmorDamage, player);
 
                 if (stack.stackSize <= 0) {
                     player.inventory.armorInventory[i] = null;

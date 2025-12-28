@@ -6,9 +6,9 @@ import btw.item.BTWItems;
 import btw.community.betterend.entity.EntityEnderMite;
 import net.minecraft.src.Block;
 import net.minecraft.src.CraftingManager;
+import net.minecraft.src.EntityList;
 import net.minecraft.src.Item;
 import net.minecraft.src.ItemStack;
-import net.minecraft.src.EntityList;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.api.EnvType;
 
@@ -25,6 +25,8 @@ public class BetterEndAddon extends BTWAddon {
     public static boolean isMiteKnockbackEnabled;
     public static int miteDropChance;
     public static int entityEnderMiteID;
+    public static int miteHungerDamage;
+    public static int miteArmorDamage;
 
     public BetterEndAddon() {
         super();
@@ -59,12 +61,13 @@ public class BetterEndAddon extends BTWAddon {
 
         config.registerInt("IDs.MiteGland", 31001, "ID for the Mite Gland item");
         config.registerInt("IDs.EntityEnderMite", 201, "Global Entity ID for Ender Mite");
-
-        config.registerInt("EnderMite.SpawnChanceEndBlocks", 10, "Chance (%) for Ender Mite to spawn when breaking End blocks (e.g. Whitestone). Default: 10%");
-        config.registerInt("EnderMite.SpawnChanceOtherBlocks", 5, "Chance (%) for Ender Mite to spawn when breaking non-End blocks in The End. Default: 5%");
+        config.registerInt("EnderMite.SpawnChanceEndBlocks", 10, "Chance (%) for Ender Mite to spawn when breaking End blocks.");
+        config.registerInt("EnderMite.SpawnChanceOtherBlocks", 5, "Chance (%) for Ender Mite to spawn when breaking non-End blocks in The End.");
         config.registerInt("EnderMite.AttackDamage", 0, "Damage dealt by Ender Mite (in half-hearts). Default: 0");
-        config.registerBoolean("EnderMite.KnockbackEnabled", false, "Does Ender Mite attack cause knockback? The AttackDamage value must be greater than 0 for Knockback to work. Default: false");
-        config.registerInt("EnderMite.DropChance", 50, "Chance (%) to drop Mite Gland. Default: 50%");
+        config.registerBoolean("EnderMite.KnockbackEnabled", false, "Does Ender Mite attack cause knockback? Default: false");
+        config.registerInt("EnderMite.DropChance", 20, "Chance (%) to drop Mite Gland. Default: 20%");
+        config.registerInt("EnderMite.HungerDamage", 1, "Amount of hunger removed per attack (1 = half shank). Default: 1");
+        config.registerInt("EnderMite.ArmorDamage", 1, "Amount of durability lost on armor per attack. Default: 1");
     }
 
     @Override
@@ -82,6 +85,12 @@ public class BetterEndAddon extends BTWAddon {
         miteAttackDamage = config.getInt("EnderMite.AttackDamage");
         isMiteKnockbackEnabled = config.getBoolean("EnderMite.KnockbackEnabled");
         miteDropChance = config.getInt("EnderMite.DropChance");
+        miteHungerDamage = config.getInt("EnderMite.HungerDamage");
+        miteArmorDamage = config.getInt("EnderMite.ArmorDamage");
+    }
+
+    private void registerEntity() {
+        EntityList.addMapping(EntityEnderMite.class, "EnderMite", entityEnderMiteID, 0x152156, 0x69178d);
     }
 
     private void createRecipes() {
@@ -94,9 +103,5 @@ public class BetterEndAddon extends BTWAddon {
                 'C', BTWItems.corpseEye,
                 'N', Item.netherStar
         });
-    }
-
-    private void registerEntity() {
-        EntityList.addMapping(EntityEnderMite.class, "EnderMite", entityEnderMiteID, 0x152156, 0x69178d);
     }
 }
