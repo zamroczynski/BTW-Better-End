@@ -1,4 +1,5 @@
 package btw.community.betterend;
+
 import api.BTWAddon;
 import api.config.AddonConfig;
 import btw.item.BTWItems;
@@ -10,8 +11,10 @@ import net.minecraft.src.Item;
 import net.minecraft.src.ItemStack;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.api.EnvType;
+
 public class BetterEndAddon extends BTWAddon {
     private static BetterEndAddon instance;
+
     public static int totemCooldownSeconds;
     public static boolean isTotemSingleUse;
     public static int crystalDebuffDuration;
@@ -30,24 +33,39 @@ public class BetterEndAddon extends BTWAddon {
     public static int dragonCrystalExplosionDamage;
     public static int dragonXPPeriodic;
     public static int dragonXPFinal;
+    public static int endlessFireBlockID;
+    public static int dragonEndlessBreathCooldown;
+    public static int dragonEndlessBreathDuration;
+    public static int dragonEndlessFireDurationMin;
+    public static int dragonEndlessFireDurationMax;
+    public static int dragonEndlessBreathRadius;
+    public static int dragonEndlessBreathWitherStrength;
+
     public BetterEndAddon() {
         super();
         instance = this;
     }
+
     public static BetterEndAddon getInstance() {
         return instance;
     }
+
     @Override
     public void initialize() {
         AddonConfig config = this.addonConfig;
         System.out.println(this.getName() + " Config Loaded.");
+
         BetterEndItems.createItems();
+        BetterEndBlocks.createBlocks();
+
         createRecipes();
         registerEntity();
+
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientProxy.registerRenderers();
         }
     }
+
     @Override
     public void registerConfigProperties(AddonConfig config) {
         config.registerInt("IDs.TotemOfTheCraven", 31000, "ID for the Totem of the Craven item");
@@ -70,7 +88,15 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("Dragon.CrystalExplosionDamage", 10, "Damage taken by Dragon when a linked crystal is destroyed. Vanilla: 10");
         config.registerInt("Dragon.XPPeriodic", 1000, "Amount of XP dropped periodically during Dragon death animation. Vanilla: 1000");
         config.registerInt("Dragon.XPFinal", 2000, "Amount of XP dropped at the end of Dragon death animation. Vanilla: 2000");
+        config.registerInt("IDs.EndlessFire", 3000, "ID for the Endless Fire block");
+        config.registerInt("Dragon.EndlessBreath.Cooldown", 1200, "Cooldown for Endless Breath attack in ticks (1200 = 60s).");
+        config.registerInt("Dragon.EndlessBreath.Duration", 60, "Duration of the Dragon's roar/hover during attack in ticks (60 = 3s).");
+        config.registerInt("Dragon.EndlessBreath.FireDurationMin", 30, "Minimum duration of Endless Fire on ground in seconds.");
+        config.registerInt("Dragon.EndlessBreath.FireDurationMax", 60, "Maximum duration of Endless Fire on ground in seconds.");
+        config.registerInt("Dragon.EndlessBreath.Radius", 10, "Radius around player to spawn Endless Fire.");
+        config.registerInt("Dragon.EndlessBreath.WitherStrength", 1, "Strength of Wither effect (0 = I, 1 = II, etc).");
     }
+
     @Override
     public void handleConfigProperties(AddonConfig config) {
         BetterEndItems.totemOfTheCravenID = config.getInt("IDs.TotemOfTheCraven");
@@ -93,10 +119,19 @@ public class BetterEndAddon extends BTWAddon {
         dragonCrystalExplosionDamage = config.getInt("Dragon.CrystalExplosionDamage");
         dragonXPPeriodic = config.getInt("Dragon.XPPeriodic");
         dragonXPFinal = config.getInt("Dragon.XPFinal");
+        endlessFireBlockID = config.getInt("IDs.EndlessFire");
+        dragonEndlessBreathCooldown = config.getInt("Dragon.EndlessBreath.Cooldown");
+        dragonEndlessBreathDuration = config.getInt("Dragon.EndlessBreath.Duration");
+        dragonEndlessFireDurationMin = config.getInt("Dragon.EndlessBreath.FireDurationMin");
+        dragonEndlessFireDurationMax = config.getInt("Dragon.EndlessBreath.FireDurationMax");
+        dragonEndlessBreathRadius = config.getInt("Dragon.EndlessBreath.Radius");
+        dragonEndlessBreathWitherStrength = config.getInt("Dragon.EndlessBreath.WitherStrength");
     }
+
     private void registerEntity() {
         EntityList.addMapping(EntityEnderMite.class, "EnderMite", entityEnderMiteID, 0x152156, 0x69178d);
     }
+
     private void createRecipes() {
         CraftingManager.getInstance().addRecipe(new ItemStack(BetterEndItems.totemOfTheCraven), new Object[] {
                 "GRG",
