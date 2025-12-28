@@ -7,7 +7,7 @@
   "authors": [
     "Bard Radogost"
   ],
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/betterend/icon.png",
   "environment": "*",
   "entrypoints": {
