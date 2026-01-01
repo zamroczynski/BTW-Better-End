@@ -9,8 +9,8 @@
 - [x] **Totem of the Craven:** An item that allows teleportation out of the End (and back to world spawn) without killing the Dragon.
 - [x] **Ender Crystal Overhaul:** Destroying crystals inflicts negative status effects (Nausea or Blindness).
 - [x] **New Mob: Ender Mite:** A silverfish-like mob that eats player hunger and armor durability. Drops "Mite Gland".
-- [ ] **Harder Ender Dragon:** Significantly buffed physical damage stats.
-- [ ] **New Dragon Attacks:**
+- [x] **Harder Ender Dragon:** Significantly buffed physical damage stats.
+- [x] **New Dragon Attacks:**
     - *Endless Breath:* Projectile attack applying a strong Wither effect.
     - *Dragon's Breath:* Purple fire that drastically degrades armor durability.
 - [ ] **New Protections:**
