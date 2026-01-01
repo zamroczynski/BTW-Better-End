@@ -2,6 +2,7 @@ package btw.community.betterend;
 
 import api.BTWAddon;
 import api.config.AddonConfig;
+import btw.community.betterend.potion.PotionDragonCurse;
 import btw.item.BTWItems;
 import btw.community.betterend.entity.EntityEnderMite;
 import net.minecraft.src.Block;
@@ -42,6 +43,15 @@ public class BetterEndAddon extends BTWAddon {
     public static int dragonEndlessBreathWitherStrength;
     public static int dragonAttackCooldown;
     public static int dragonEndlessBreathWitherDuration;
+    public static int dragonFireBlockID;
+    public static int potionDragonCurseID;
+    public static PotionDragonCurse potionDragonCurse;
+    public static int dragonBreathDuration;
+    public static int dragonBreathFireDurationMin;
+    public static int dragonBreathFireDurationMax;
+    public static int dragonBreathFireBurnDuration;
+    public static int dragonCurseDuration;
+    public static double dragonCurseArmorMultiplier;
 
     public BetterEndAddon() {
         super();
@@ -56,6 +66,11 @@ public class BetterEndAddon extends BTWAddon {
     public void initialize() {
         AddonConfig config = this.addonConfig;
         System.out.println(this.getName() + " Config Loaded.");
+
+        if (net.minecraft.src.Potion.potionTypes[potionDragonCurseID] != null) {
+            throw new RuntimeException("BetterEnd Error: Potion ID " + potionDragonCurseID + " is already in use!");
+        }
+        potionDragonCurse = new PotionDragonCurse(potionDragonCurseID);
 
         BetterEndItems.createItems();
         BetterEndBlocks.createBlocks();
@@ -99,6 +114,14 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("Dragon.EndlessBreath.WitherStrength", 1, "Strength of Wither effect (0 = I, 1 = II, etc).");
         config.registerInt("Dragon.General.AttackCooldown", 15, "Time in seconds between Dragon attacks (Peace phase).");
         config.registerInt("Dragon.EndlessBreath.WitherDuration", 100, "Duration of Wither effect from Endless Fire in ticks (100 = 5s).");
+        config.registerInt("IDs.DragonFire", 3001, "ID for the Dragon Fire block");
+        config.registerInt("IDs.PotionDragonCurse", 24, "ID for Dragon Curse potion effect (Check for conflicts!)");
+        config.registerInt("Dragon.DragonsBreath.Duration", 100, "Duration of Dragon's Breath attack in ticks (100 = 5s).");
+        config.registerInt("Dragon.DragonsBreath.FireDurationMin", 15, "Min duration of Dragon Fire on ground (seconds).");
+        config.registerInt("Dragon.DragonsBreath.FireDurationMax", 30, "Max duration of Dragon Fire on ground (seconds).");
+        config.registerInt("Dragon.DragonsBreath.BurnDuration", 15, "How long player burns after touching Dragon Fire (seconds).");
+        config.registerInt("Dragon.DragonsBreath.CurseDuration", 600, "Duration of Dragon Curse effect in ticks (600 = 30s).");
+        config.registerDouble("Dragon.DragonsBreath.CurseArmorMultiplier", 2.0f, "Multiplier for armor damage when cursed.");
     }
 
     @Override
@@ -132,6 +155,14 @@ public class BetterEndAddon extends BTWAddon {
         dragonEndlessBreathWitherStrength = config.getInt("Dragon.EndlessBreath.WitherStrength");
         dragonAttackCooldown = config.getInt("Dragon.General.AttackCooldown");
         dragonEndlessBreathWitherDuration = config.getInt("Dragon.EndlessBreath.WitherDuration");
+        dragonFireBlockID = config.getInt("IDs.DragonFire");
+        potionDragonCurseID = config.getInt("IDs.PotionDragonCurse");
+        dragonBreathDuration = config.getInt("Dragon.DragonsBreath.Duration");
+        dragonBreathFireDurationMin = config.getInt("Dragon.DragonsBreath.FireDurationMin");
+        dragonBreathFireDurationMax = config.getInt("Dragon.DragonsBreath.FireDurationMax");
+        dragonBreathFireBurnDuration = config.getInt("Dragon.DragonsBreath.BurnDuration");
+        dragonCurseDuration = config.getInt("Dragon.DragonsBreath.CurseDuration");
+        dragonCurseArmorMultiplier = config.getDouble("Dragon.DragonsBreath.CurseArmorMultiplier");
     }
 
     private void registerEntity() {
