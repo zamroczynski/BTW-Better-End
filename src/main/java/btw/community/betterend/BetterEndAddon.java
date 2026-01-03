@@ -2,6 +2,7 @@ package btw.community.betterend;
 
 import api.BTWAddon;
 import api.config.AddonConfig;
+import btw.community.betterend.entity.EntityEnderGuardian;
 import btw.community.betterend.potion.PotionDragonCurse;
 import btw.item.BTWItems;
 import btw.community.betterend.entity.EntityEnderMite;
@@ -52,6 +53,18 @@ public class BetterEndAddon extends BTWAddon {
     public static int dragonBreathFireBurnDuration;
     public static int dragonCurseDuration;
     public static double dragonCurseArmorMultiplier;
+    public static int entityEnderGuardianID;
+    public static int guardianArmorChanceWool;
+    public static int guardianArmorChanceLeather;
+    public static int guardianArmorChanceIron;
+    public static int guardianArmorChanceChain;
+    public static int guardianArmorChanceDiamond;
+    public static int guardianArmorChanceSoulSteel;
+    public static int guardianMaxHealth;
+    public static int guardianAttackDamage;
+    public static double guardianKnockbackResistance;
+    public static double guardianMovementSpeed;
+    public static double guardianFollowRange;
 
     public BetterEndAddon() {
         super();
@@ -122,6 +135,18 @@ public class BetterEndAddon extends BTWAddon {
         config.registerInt("Dragon.DragonsBreath.BurnDuration", 15, "How long player burns after touching Dragon Fire (seconds).");
         config.registerInt("Dragon.DragonsBreath.CurseDuration", 600, "Duration of Dragon Curse effect in ticks (600 = 30s).");
         config.registerDouble("Dragon.DragonsBreath.CurseArmorMultiplier", 2.0f, "Multiplier for armor damage when cursed.");
+        config.registerInt("IDs.EntityEnderGuardian", 202, "Global Entity ID for Ender Guardian");
+        config.registerInt("EnderGuardian.ArmorChance.Wool", 0, "Chance (0-100) for Ender Guardian to spawn with Wool armor.");
+        config.registerInt("EnderGuardian.ArmorChance.Leather", 20, "Chance (0-100) for Ender Guardian to spawn with Leather armor.");
+        config.registerInt("EnderGuardian.ArmorChance.Iron", 40, "Chance (0-100) for Ender Guardian to spawn with Iron armor.");
+        config.registerInt("EnderGuardian.ArmorChance.Chain", 30, "Chance (0-100) for Ender Guardian to spawn with Chainmail armor.");
+        config.registerInt("EnderGuardian.ArmorChance.Diamond", 0, "Chance (0-100) for Ender Guardian to spawn with Diamond armor.");
+        config.registerInt("EnderGuardian.ArmorChance.SoulSteel", 0, "Chance (0-100) for Ender Guardian to spawn with Soulforged Steel armor.");
+        config.registerInt("EnderGuardian.MaxHealth", 20, "Max health of Ender Guardian (20 = 10 hearts). Default Zombie: 20");
+        config.registerInt("EnderGuardian.AttackDamage", 3, "Attack damage of Ender Guardian. Default Zombie: 3");
+        config.registerDouble("EnderGuardian.KnockbackResistance", 0.01D, "Resistance to knockback (0.0 = none, 1.0 = full immunity). Default: 0.01");
+        config.registerDouble("EnderGuardian.MovementSpeed", 0.23, "Movement speed of Ender Guardian. Default Zombie: 0.23");
+        config.registerDouble("EnderGuardian.FollowRange", 16.0, "Range in blocks to detect player. Default Zombie: 16.0");
     }
 
     @Override
@@ -163,10 +188,23 @@ public class BetterEndAddon extends BTWAddon {
         dragonBreathFireBurnDuration = config.getInt("Dragon.DragonsBreath.BurnDuration");
         dragonCurseDuration = config.getInt("Dragon.DragonsBreath.CurseDuration");
         dragonCurseArmorMultiplier = config.getDouble("Dragon.DragonsBreath.CurseArmorMultiplier");
+        entityEnderGuardianID = config.getInt("IDs.EntityEnderGuardian");
+        guardianArmorChanceWool = config.getInt("EnderGuardian.ArmorChance.Wool");
+        guardianArmorChanceLeather = config.getInt("EnderGuardian.ArmorChance.Leather");
+        guardianArmorChanceIron = config.getInt("EnderGuardian.ArmorChance.Iron");
+        guardianArmorChanceChain = config.getInt("EnderGuardian.ArmorChance.Chain");
+        guardianArmorChanceDiamond = config.getInt("EnderGuardian.ArmorChance.Diamond");
+        guardianArmorChanceSoulSteel = config.getInt("EnderGuardian.ArmorChance.SoulSteel");
+        guardianMaxHealth = config.getInt("EnderGuardian.MaxHealth");
+        guardianAttackDamage = config.getInt("EnderGuardian.AttackDamage");
+        guardianKnockbackResistance = config.getDouble("EnderGuardian.KnockbackResistance");
+        guardianMovementSpeed = config.getDouble("EnderGuardian.MovementSpeed");
+        guardianFollowRange = config.getDouble("EnderGuardian.FollowRange");
     }
 
     private void registerEntity() {
         EntityList.addMapping(EntityEnderMite.class, "EnderMite", entityEnderMiteID, 0x152156, 0x69178d);
+        EntityList.addMapping(EntityEnderGuardian.class, "EnderGuardian", entityEnderGuardianID, 0x000000, 0x6016A8);
     }
 
     private void createRecipes() {

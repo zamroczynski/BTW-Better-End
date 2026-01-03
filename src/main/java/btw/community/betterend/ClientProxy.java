@@ -2,6 +2,8 @@ package btw.community.betterend;
 
 import btw.community.betterend.client.RenderEnderMite;
 import btw.community.betterend.entity.EntityEnderMite;
+import btw.community.betterend.client.RenderEnderGuardian;
+import btw.community.betterend.entity.EntityEnderGuardian;
 import net.minecraft.src.Render;
 import net.minecraft.src.RenderManager;
 import java.lang.reflect.Field;
@@ -27,6 +29,9 @@ public class ClientProxy {
             renderMapField.setAccessible(true);
             Map<Class, Render> renderMap = (Map<Class, Render>) renderMapField.get(RenderManager.instance);
             renderMap.put(EntityEnderMite.class, renderer);
+            RenderEnderGuardian guardianRenderer = new RenderEnderGuardian();
+            guardianRenderer.setRenderManager(RenderManager.instance);
+            renderMap.put(EntityEnderGuardian.class, guardianRenderer);
         } catch (Exception e) {
             System.err.println("BetterEnd Error: Failed to register renderers!");
             e.printStackTrace();
