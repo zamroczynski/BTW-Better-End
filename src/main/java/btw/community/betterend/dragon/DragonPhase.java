@@ -6,5 +6,7 @@ public enum DragonPhase {
     BREATHING,
     DRAGON_BREATHING,
     CHARGING,
+    VOID_INFESTATION,
+    ROYAL_ESCORT,
     RECOVERY
 }

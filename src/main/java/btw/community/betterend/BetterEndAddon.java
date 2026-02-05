@@ -65,6 +65,11 @@ public class BetterEndAddon extends BTWAddon {
     public static double guardianKnockbackResistance;
     public static double guardianMovementSpeed;
     public static double guardianFollowRange;
+    public static int dragonVoidInfestationMin;
+    public static int dragonVoidInfestationMax;
+    public static int dragonRoyalEscortMin;
+    public static int dragonRoyalEscortMax;
+    public static double dragonAttackSpawnDistance;
 
     public BetterEndAddon() {
         super();
@@ -147,6 +152,11 @@ public class BetterEndAddon extends BTWAddon {
         config.registerDouble("EnderGuardian.KnockbackResistance", 0.01D, "Resistance to knockback (0.0 = none, 1.0 = full immunity). Default: 0.01");
         config.registerDouble("EnderGuardian.MovementSpeed", 0.23, "Movement speed of Ender Guardian. Default Zombie: 0.23");
         config.registerDouble("EnderGuardian.FollowRange", 16.0, "Range in blocks to detect player. Default Zombie: 16.0");
+        config.registerInt("Dragon.VoidInfestation.MinMites", 5, "Minimum number of Ender Mites spawned during Void Infestation.");
+        config.registerInt("Dragon.VoidInfestation.MaxMites", 10, "Maximum number of Ender Mites spawned during Void Infestation.");
+        config.registerInt("Dragon.RoyalEscort.MinGuardians", 2, "Minimum number of Ender Guardians spawned during Royal Escort.");
+        config.registerInt("Dragon.RoyalEscort.MaxGuardians", 5, "Maximum number of Ender Guardians spawned during Royal Escort.");
+        config.registerDouble("Dragon.General.AttackSpawnDistance", 15.0, "Distance from player at which the Dragon spawns minions (in blocks).");
     }
 
     @Override
@@ -200,6 +210,11 @@ public class BetterEndAddon extends BTWAddon {
         guardianKnockbackResistance = config.getDouble("EnderGuardian.KnockbackResistance");
         guardianMovementSpeed = config.getDouble("EnderGuardian.MovementSpeed");
         guardianFollowRange = config.getDouble("EnderGuardian.FollowRange");
+        dragonVoidInfestationMin = config.getInt("Dragon.VoidInfestation.MinMites");
+        dragonVoidInfestationMax = config.getInt("Dragon.VoidInfestation.MaxMites");
+        dragonRoyalEscortMin = config.getInt("Dragon.RoyalEscort.MinGuardians");
+        dragonRoyalEscortMax = config.getInt("Dragon.RoyalEscort.MaxGuardians");
+        dragonAttackSpawnDistance = config.getDouble("Dragon.General.AttackSpawnDistance");
     }
 
     private void registerEntity() {

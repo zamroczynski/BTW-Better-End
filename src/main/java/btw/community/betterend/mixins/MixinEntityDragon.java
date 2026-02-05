@@ -3,6 +3,8 @@ package btw.community.betterend.mixins;
 import btw.community.betterend.BetterEndAddon;
 import btw.community.betterend.BetterEndBlocks;
 import btw.community.betterend.dragon.DragonPhase;
+import btw.community.betterend.entity.EntityEnderGuardian;
+import btw.community.betterend.entity.EntityEnderMite;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,6 +19,7 @@ import java.util.Random;
 
 @Mixin(EntityDragon.class)
 public abstract class MixinEntityDragon extends EntityLiving {
+
     @Shadow public float animTime;
     @Shadow public float prevAnimTime;
     @Shadow public EntityDragonPart dragonPartHead;
@@ -33,6 +36,7 @@ public abstract class MixinEntityDragon extends EntityLiving {
     @Shadow private Entity target;
     @Shadow public double[][] ringBuffer;
     @Shadow public int ringBufferIndex;
+
     @Shadow protected abstract void updateDragonEnderCrystal();
     @Shadow protected abstract void collideWithEntities(List par1List);
     @Shadow protected abstract void attackEntitiesInList(List par1List);
@@ -43,6 +47,7 @@ public abstract class MixinEntityDragon extends EntityLiving {
     @Unique private DragonPhase be_currentPhase = DragonPhase.COOLDOWN;
     @Unique private int be_phaseTimer = 200;
     @Unique private EntityPlayer be_targetPlayer = null;
+    @Unique private boolean be_hasSpawnedMinions = false;
     @Unique private static final int BE_PHASE_WATCHER_ID = 24;
 
     public MixinEntityDragon(World par1World) {
@@ -75,7 +80,6 @@ public abstract class MixinEntityDragon extends EntityLiving {
         this.dataWatcher.addObject(BE_PHASE_WATCHER_ID, (byte)0);
     }
 
-    // --- Main Logic ---
     @Inject(method = "onLivingUpdate", at = @At("HEAD"), cancellable = true)
     public void be_onLivingUpdate(CallbackInfo ci) {
         if (this.getHealth() <= 0) return;
@@ -95,7 +99,6 @@ public abstract class MixinEntityDragon extends EntityLiving {
             ci.cancel();
             return;
         }
-
         if (be_currentPhase == DragonPhase.DRAGON_BREATHING || dwValue == 2) {
             if (be_currentPhase != DragonPhase.DRAGON_BREATHING) be_currentPhase = DragonPhase.DRAGON_BREATHING;
             be_handleDragonBreathingState();
@@ -103,15 +106,20 @@ public abstract class MixinEntityDragon extends EntityLiving {
             return;
         }
 
+        // Logika serwerowa
         if (!isClient) {
             switch (be_currentPhase) {
                 case COOLDOWN: be_handleCooldownState(); break;
                 case SELECTING: be_handleSelectionState(); break;
                 case CHARGING: be_handleChargingState(); break;
                 case RECOVERY: be_handleRecoveryState(); break;
+                case VOID_INFESTATION: be_handleVoidInfestationState(); break;
+                case ROYAL_ESCORT: be_handleRoyalEscortState(); break;
             }
         }
     }
+
+    // --- Obsługa Stanów ---
 
     @Unique
     private void be_handleCooldownState() {
@@ -138,15 +146,30 @@ public abstract class MixinEntityDragon extends EntityLiving {
 
         this.be_targetPlayer = player;
 
-        int choice = this.rand.nextInt(3);
+        // Rozszerzona pula losowania ataków (0-4)
+        int choice = this.rand.nextInt(5);
 
         if (choice == 0) {
             be_startChargingAttack();
         } else if (choice == 1) {
             be_startBreathingAttack(); // Endless Breath
-        } else {
+        } else if (choice == 2) {
             be_startDragonBreathingAttack(); // Dragon's Breath
+        } else if (choice == 3) {
+            be_startVoidInfestationAttack(); // Void Infestation (Mites)
+        } else {
+            be_startRoyalEscortAttack(); // Royal Escort (Guardians)
         }
+    }
+
+    // 1. Standard Charging
+    @Unique
+    private void be_startChargingAttack() {
+        be_currentPhase = DragonPhase.CHARGING;
+        be_phaseTimer = 100;
+        this.target = be_targetPlayer;
+        this.forceNewTarget = false;
+        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)0);
     }
 
     @Unique
@@ -154,6 +177,110 @@ public abstract class MixinEntityDragon extends EntityLiving {
         be_phaseTimer--;
         if (be_targetPlayer == null || be_targetPlayer.isDead || be_phaseTimer <= 0 || this.getDistanceSqToEntity(be_targetPlayer) < 225.0D) {
             be_enterRecoveryState();
+        }
+    }
+
+    // 2. Void Infestation (Ender Mites)
+    @Unique
+    private void be_startVoidInfestationAttack() {
+        be_currentPhase = DragonPhase.VOID_INFESTATION;
+        be_phaseTimer = 100;
+        this.target = be_targetPlayer;
+        this.forceNewTarget = false;
+        this.be_hasSpawnedMinions = false;
+        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)0); // Dla klienta wygląda jak szarża
+        this.worldObj.playSoundAtEntity(this, "mob.enderdragon.growl", 10.0F, 0.8F);
+    }
+
+    @Unique
+    private void be_handleVoidInfestationState() {
+        be_phaseTimer--;
+        if (be_targetPlayer == null || be_targetPlayer.isDead || be_phaseTimer <= 0) {
+            be_enterRecoveryState();
+            return;
+        }
+
+        double distSq = this.getDistanceSqToEntity(be_targetPlayer);
+        double spawnDist = BetterEndAddon.dragonAttackSpawnDistance;
+
+        if (!be_hasSpawnedMinions && distSq < (spawnDist * spawnDist)) {
+            int count = BetterEndAddon.dragonVoidInfestationMin + this.rand.nextInt(BetterEndAddon.dragonVoidInfestationMax - BetterEndAddon.dragonVoidInfestationMin + 1);
+            be_spawnMinions(EntityEnderMite.class, count);
+            be_hasSpawnedMinions = true;
+        }
+
+        if (distSq < 225.0D) {
+            be_enterRecoveryState();
+        }
+    }
+
+    // 3. Royal Escort (Ender Guardians)
+    @Unique
+    private void be_startRoyalEscortAttack() {
+        be_currentPhase = DragonPhase.ROYAL_ESCORT;
+        be_phaseTimer = 100;
+        this.target = be_targetPlayer;
+        this.forceNewTarget = false;
+        this.be_hasSpawnedMinions = false;
+        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)0);
+        this.worldObj.playSoundAtEntity(this, "mob.enderdragon.growl", 10.0F, 0.6F);
+    }
+
+    @Unique
+    private void be_handleRoyalEscortState() {
+        be_phaseTimer--;
+        if (be_targetPlayer == null || be_targetPlayer.isDead || be_phaseTimer <= 0) {
+            be_enterRecoveryState();
+            return;
+        }
+
+        double distSq = this.getDistanceSqToEntity(be_targetPlayer);
+        double spawnDist = BetterEndAddon.dragonAttackSpawnDistance;
+
+        if (!be_hasSpawnedMinions && distSq < (spawnDist * spawnDist)) {
+            int count = BetterEndAddon.dragonRoyalEscortMin + this.rand.nextInt(BetterEndAddon.dragonRoyalEscortMax - BetterEndAddon.dragonRoyalEscortMin + 1);
+            be_spawnMinions(EntityEnderGuardian.class, count);
+            be_hasSpawnedMinions = true;
+        }
+
+        if (distSq < 225.0D) {
+            be_enterRecoveryState();
+        }
+    }
+
+    // --- Helper Metoda Spawnowania ---
+    @Unique
+    private void be_spawnMinions(Class<? extends EntityLiving> entityClass, int count) {
+        if (this.worldObj.isRemote) return;
+
+        for (int i = 0; i < count; i++) {
+            try {
+                EntityLiving entity = entityClass.getConstructor(World.class).newInstance(this.worldObj);
+
+                double offsetX = (this.rand.nextDouble() - 0.5D) * 4.0D;
+                double offsetZ = (this.rand.nextDouble() - 0.5D) * 4.0D;
+                double offsetY = -2.0D;
+
+                entity.setLocationAndAngles(this.posX + offsetX, this.posY + offsetY, this.posZ + offsetZ, this.rand.nextFloat() * 360.0F, 0.0F);
+
+                if (be_targetPlayer != null) {
+                    double dx = be_targetPlayer.posX - entity.posX;
+                    double dz = be_targetPlayer.posZ - entity.posZ;
+                    double dist = Math.sqrt(dx*dx + dz*dz);
+                    if (dist > 0.1) {
+                        entity.motionX = (dx / dist) * 0.5;
+                        entity.motionZ = (dz / dist) * 0.5;
+                    }
+                }
+
+                entity.onSpawnWithEgg(null);
+
+                this.worldObj.spawnEntityInWorld(entity);
+                this.worldObj.playSoundAtEntity(entity, "mob.endermen.portal", 1.0F, 1.0F);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -171,37 +298,6 @@ public abstract class MixinEntityDragon extends EntityLiving {
         }
     }
 
-    // --- Attack Logic ---
-
-    @Unique
-    private void be_startChargingAttack() {
-        be_currentPhase = DragonPhase.CHARGING;
-        be_phaseTimer = 100;
-        this.target = be_targetPlayer;
-        this.forceNewTarget = false;
-        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)0);
-    }
-
-    @Unique
-    private void be_startBreathingAttack() {
-        be_currentPhase = DragonPhase.BREATHING;
-        be_phaseTimer = BetterEndAddon.dragonEndlessBreathDuration + 20;
-        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)1); // Sync: Endless Breath
-        this.worldObj.playSoundAtEntity(this, "mob.enderdragon.growl", 10.0F, 0.5F);
-        this.target = null;
-        this.forceNewTarget = false;
-    }
-
-    @Unique
-    private void be_startDragonBreathingAttack() {
-        be_currentPhase = DragonPhase.DRAGON_BREATHING;
-        be_phaseTimer = BetterEndAddon.dragonBreathDuration + 20;
-        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)2); // Sync: Dragon Breath
-        this.worldObj.playSoundAtEntity(this, "mob.enderdragon.growl", 10.0F, 0.5F);
-        this.target = null;
-        this.forceNewTarget = false;
-    }
-
     @Unique
     private void be_enterRecoveryState() {
         be_currentPhase = DragonPhase.RECOVERY;
@@ -214,23 +310,38 @@ public abstract class MixinEntityDragon extends EntityLiving {
         this.targetZ = 0.0D;
     }
 
-    // 1. Endless Breath
+    @Unique
+    private void be_startBreathingAttack() {
+        be_currentPhase = DragonPhase.BREATHING;
+        be_phaseTimer = BetterEndAddon.dragonEndlessBreathDuration + 20;
+        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)1);
+        this.worldObj.playSoundAtEntity(this, "mob.enderdragon.growl", 10.0F, 0.5F);
+        this.target = null;
+        this.forceNewTarget = false;
+    }
+
+    @Unique
+    private void be_startDragonBreathingAttack() {
+        be_currentPhase = DragonPhase.DRAGON_BREATHING;
+        be_phaseTimer = BetterEndAddon.dragonBreathDuration + 20;
+        this.dataWatcher.updateObject(BE_PHASE_WATCHER_ID, (byte)2);
+        this.worldObj.playSoundAtEntity(this, "mob.enderdragon.growl", 10.0F, 0.5F);
+        this.target = null;
+        this.forceNewTarget = false;
+    }
+
     @Unique
     private void be_handleBreathingState() {
         be_commonBreathingAnimation();
-
-        // Spawn Endless Fire
         if (!this.worldObj.isRemote && be_phaseTimer == 20) {
             be_spawnEndlessFire();
             this.worldObj.playSoundAtEntity(this, "mob.ghast.fireball", 10.0F, 0.5F);
         }
     }
 
-    // 2. Dragon's Breath
     @Unique
     private void be_handleDragonBreathingState() {
         be_commonBreathingAnimation();
-
         if (!this.worldObj.isRemote && be_phaseTimer == 20) {
             be_spawnDragonFire();
             this.worldObj.playSoundAtEntity(this, "mob.ghast.fireball", 10.0F, 0.5F);
@@ -254,6 +365,7 @@ public abstract class MixinEntityDragon extends EntityLiving {
         if (target == null && this.worldObj.isRemote) {
             target = this.worldObj.getClosestPlayerToEntity(this, 150.0D);
         }
+
         if (target != null) {
             double dx = target.posX - this.posX;
             double dz = target.posZ - this.posZ;
@@ -274,7 +386,6 @@ public abstract class MixinEntityDragon extends EntityLiving {
                 this.worldObj.playSound(this.posX, this.posY, this.posZ, "mob.enderdragon.wings", 5.0F, 0.8F + this.rand.nextFloat() * 0.3F, false);
             }
         }
-
         be_updateBodyParts();
     }
 
@@ -297,7 +408,6 @@ public abstract class MixinEntityDragon extends EntityLiving {
         for (int i = 0; i < radius * 5; i++) {
             double r = radius * Math.sqrt(this.rand.nextDouble());
             double theta = this.rand.nextDouble() * 2 * Math.PI;
-
             int x = MathHelper.floor_double(be_targetPlayer.posX + r * Math.cos(theta));
             int z = MathHelper.floor_double(be_targetPlayer.posZ + r * Math.sin(theta));
             int y = MathHelper.floor_double(be_targetPlayer.posY);
@@ -317,18 +427,21 @@ public abstract class MixinEntityDragon extends EntityLiving {
         }
     }
 
-    // --- Helping method
+    // --- Reszta metod aktualizujących ciało smoka (bez zmian, ale potrzebne w Mixinie) ---
     @Unique
     private void be_updateBodyParts() {
+        // (Kod identyczny jak w poprzedniej wersji, aktualizujący ringBuffer i części ciała)
         if (this.ringBufferIndex < 0) {
             for(int i = 0; i < this.ringBuffer.length; ++i) {
                 this.ringBuffer[i][0] = this.rotationYaw;
                 this.ringBuffer[i][1] = this.posY;
             }
         }
+
         if (++this.ringBufferIndex == this.ringBuffer.length) {
             this.ringBufferIndex = 0;
         }
+
         this.ringBuffer[this.ringBufferIndex][0] = this.rotationYaw;
         this.ringBuffer[this.ringBufferIndex][1] = this.posY;
 
